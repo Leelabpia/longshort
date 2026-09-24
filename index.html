@@ -17,7 +17,7 @@
   --bg: #F2F4F7; --surface: #FFFFFF; --ink: #141A21; --muted: #5E6A78; --line: #DDE2E8;
   --up: #D63A34; --down: #2B6FD9; --flat: #5E6A78; --on-side: #FFFFFF;
   --live: #1F9D6B; --on-live: #FFFFFF; --sel: #EAF4F1;
-  --s1: #0E6B5B; --s2: #35A08D; --s3: #9DD3C7;
+  --s1: #0E6B5B; --s2: #35A08D; --s3: #9DD3C7; --s4: #C9A227;
   --warn-bg: #FBE9D6; --warn-ink: #8A4A0B; --tag-bg: #E6EBF0; --tag-ink: #2A3542;
   color-scheme: light;
 }
@@ -26,7 +26,7 @@
     --bg: #0D1115; --surface: #151B21; --ink: #E8ECF0; --muted: #94A0AE; --line: #26303A;
     --up: #FF6F68; --down: #6FA6FF; --flat: #94A0AE; --on-side: #10141A;
     --live: #3DD69A; --on-live: #10141A; --sel: #1B2B29;
-    --s1: #1FA089; --s2: #58C4B0; --s3: #A8E2D5;
+    --s1: #1FA089; --s2: #58C4B0; --s3: #A8E2D5; --s4: #E3C25A;
     --warn-bg: #3A2A16; --warn-ink: #F2B877; --tag-bg: #212A33; --tag-ink: #C9D2DB;
     color-scheme: dark;
   }
@@ -99,7 +99,7 @@ section { display: flex; flex-direction: column; gap: 10px; padding-top: 12px; }
 .name small { color: var(--muted); font-size: 11.5px; margin-left: 2px; }
 .pstat { margin-left: auto; font-size: 12px; font-weight: 700; padding: 1px 9px; border-radius: 999px; background: var(--tag-bg); color: var(--tag-ink); white-space: nowrap; }
 .pstat[data-st="go"] { background: var(--live); color: var(--on-live); }
-.pstat[data-st="late"], .pstat[data-st="warn"] { background: var(--warn-bg); color: var(--warn-ink); }
+.pstat[data-st="late"], .pstat[data-st="warn"], .pstat[data-st="touch"] { background: var(--warn-bg); color: var(--warn-ink); }
 .pstat[data-st="void"] { background: transparent; color: var(--warn-ink); box-shadow: inset 0 0 0 1px var(--warn-ink); text-decoration: line-through; }
 .pstat[data-st="none"] { background: transparent; color: var(--muted); box-shadow: inset 0 0 0 1px var(--line); font-weight: 600; }
 .c-price { display: flex; align-items: center; gap: 10px; }
@@ -110,15 +110,16 @@ section { display: flex; flex-direction: column; gap: 10px; padding-top: 12px; }
 .up { color: var(--up); } .down { color: var(--down); } .flat { color: var(--flat); }
 .spark { display: block; }
 .plan { display: grid; grid-template-columns: auto auto 1fr; gap: 2px 12px; align-items: baseline; font-size: 13.5px; padding: 8px 10px; background: var(--bg); border-radius: 8px; }
-.plan .k { color: var(--muted); font-size: 12px; }
+.plan .k { color: var(--muted); font-size: 12px; white-space: nowrap; }
 .plan b { font-weight: 700; }
 .plan em { font-style: normal; color: var(--muted); font-size: 12px; text-align: right; }
 .pnote { color: var(--muted); font-size: 12px; }
+.pnote.lvl { color: var(--tag-ink); margin-bottom: 4px; }
 .pnone { color: var(--muted); font-size: 12.5px; padding: 8px 10px; background: var(--bg); border-radius: 8px; }
 .c-score { display: flex; align-items: center; gap: 10px; }
 .scorebar { flex: 1; display: flex; height: 8px; background: var(--tag-bg); border-radius: 4px; overflow: hidden; }
 .scorebar i { display: block; height: 100%; }
-.scorebar .s1 { background: var(--s1); } .scorebar .s2 { background: var(--s2); } .scorebar .s3 { background: var(--s3); }
+.scorebar .s1 { background: var(--s1); } .scorebar .s2 { background: var(--s2); } .scorebar .s3 { background: var(--s3); } .scorebar .s4 { background: var(--s4); }
 .scorenum { font-size: 16px; font-weight: 800; }
 .pen { color: var(--warn-ink); font-size: 12px; }
 .tags { display: flex; flex-wrap: wrap; gap: 4px; }
@@ -193,11 +194,11 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
 
   <main class="lists">
     <section id="sec-long" aria-labelledby="h-long">
-      <div class="sechead"><span class="badge long">LONG</span><h2 id="h-long">롱 후보</h2><span class="sub" id="sub-long">20일 고점 돌파 · 상승 추세</span></div>
+      <div class="sechead"><span class="badge long">LONG</span><h2 id="h-long">롱 후보</h2><span class="sub" id="sub-long">20일 고점 돌파 · 200일선 위</span></div>
       <div class="cards" id="cards-long"><div class="skeleton"></div><div class="skeleton"></div></div>
     </section>
     <section id="sec-short" aria-labelledby="h-short">
-      <div class="sechead"><span class="badge short">SHORT</span><h2 id="h-short">숏 후보</h2><span class="sub" id="sub-short">20일 저점 이탈 · 하락 추세</span></div>
+      <div class="sechead"><span class="badge short">SHORT</span><h2 id="h-short">숏 후보</h2><span class="sub" id="sub-short">20일 저점 이탈 · 200일선 아래</span></div>
       <div class="cards" id="cards-short"><div class="skeleton"></div><div class="skeleton"></div></div>
     </section>
   </main>
@@ -205,7 +206,8 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
   <footer>
     공개 시세를 규칙대로 계산한 스크리닝 결과이며 투자 권유나 수익 보장이 아니에요. 진입가·손절·목표는 15분봉 규칙으로 계산한 참고 값이고 수수료와 슬리피지는 반영하지 않았어요.
     선물은 레버리지 때문에 작은 반대 움직임에도 청산될 수 있어요. 특히 숏은 급등 한 번에 손실이 커지니, 진입 전에 차트와 호가를 직접 확인하고 손절 기준과 레버리지를 먼저 정해 두세요.
-    점수·순위·진입가는 스캔한 시점 기준이고, 가격과 진입 상태만 실시간으로 바뀌어요. 진입 구간 알림은 앱을 열어 둔 동안에만 울려요.
+    롱은 200일 이동평균선 위, 숏은 아래인 종목만 나오고 큰 추세를 거스르는 진입은 만들지 않아요. 점수는 거래량 30 · 돌파 30 · 모멘텀 25 · 볼린저밴드 15점이에요.
+    점수·순위·진입가는 스캔한 시점 기준이고, 가격과 진입 상태만 실시간으로 바뀌어요. 진입 구간·종가 손절 알림과 폰 메시지는 앱을 열어 둔 동안에만 보내져요. 손절 주문(강제 손절)은 꼭 거래소에 미리 걸어 두세요.
   </footer>
 </div>
 
@@ -245,6 +247,19 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
       <label class="check"><input type="checkbox" id="f-alerts"> 진입 구간에 들어오면 알림 (소리·진동)</label>
       <button type="button" class="btn" id="btn-notify" style="align-self:flex-start">시스템 알림도 켜기</button>
       <small id="notify-note">브라우저 알림 권한을 요청해요. 안 켜도 앱 안에서는 알려요.</small></div>
+    <div class="field"><span class="lab">폰으로 메시지 받기 (진입 구간 도착 · 종가 손절 신호)</span>
+      <small>앱이 열려 있는 동안 보내져요. 아래 둘 중 편한 것 하나만 설정해도 돼요. 토큰은 이 폰 안에만 저장돼요.</small>
+      <label for="f-ntfy" class="lab" style="margin-top:6px">ntfy 주제 이름 (가장 쉬움)</label>
+      <input type="text" id="f-ntfy" placeholder="예: longshort-x7k2m9q4" autocomplete="off" autocapitalize="off">
+      <button type="button" class="btn" id="btn-ntfy-gen" style="align-self:flex-start">주제 이름 자동 만들기</button>
+      <small>폰에 ntfy 앱을 설치하고 같은 주제 이름을 구독하면 알림이 와요. 주제 이름을 아는 사람은 누구나 볼 수 있으니 남이 추측하기 어려운 이름을 쓰세요.</small>
+      <label for="f-tgtoken" class="lab" style="margin-top:6px">텔레그램 봇 토큰</label>
+      <input type="text" id="f-tgtoken" placeholder="123456:ABC-..." autocomplete="off" autocapitalize="off">
+      <label for="f-tgchat" class="lab">텔레그램 채팅 ID</label>
+      <input type="text" id="f-tgchat" placeholder="숫자" autocomplete="off" autocapitalize="off" inputmode="numeric">
+      <button type="button" class="btn" id="btn-tg-find" style="align-self:flex-start">채팅 ID 자동으로 찾기</button>
+      <button type="button" class="btn" id="btn-remote-test" style="align-self:flex-start">테스트 메시지 보내기</button>
+      <small id="remote-note" role="status" aria-live="polite">봇에게 아무 말이나 한 번 보낸 뒤 '자동으로 찾기'를 누르세요.</small></div>
     <div class="field"><label for="f-layout">내 TradingView 레이아웃 주소 (선택)</label>
       <input type="text" id="f-layout" placeholder="https://www.tradingview.com/chart/xxxxxxxx/" autocomplete="off" autocapitalize="off"></div>
     <div class="field"><label for="f-api">OKX API 주소 (고급)</label>
@@ -268,7 +283,7 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
   var theme = (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
 
   /* ---------------------------------------------------------------- 설정 */
-  var DEFAULTS = { market: 'swap', top: 10, minVol: 5000000, universe: 150, autoMin: 5, colors: 'kr', alerts: true, layout: '', apiBase: '' };
+  var DEFAULTS = { market: 'swap', top: 10, minVol: 5000000, universe: 150, autoMin: 5, colors: 'kr', alerts: true, layout: '', apiBase: '', tgToken: '', tgChat: '', ntfyTopic: '' };
   var SKEY = 'longshort.settings.v1';
   function loadSettings() {
     var s = {}, k;
@@ -314,6 +329,7 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
   var STABLES = {}; 'USDC DAI TUSD FDUSD USDD PYUSD USDG USDE USDT EURC EUR USDP BUSD GUSD LUSD FRAX USD1 RLUSD'.split(' ').forEach(function (s) { STABLES[s] = 1; });
   var MIN_VOLUME_RATIO = 1.5, NEAR_EDGE = 0.05, FUNDING_ADVERSE = 0.0003;
   var TP_R = [1.0, 2.0], SWING_BARS = 16, STOP_BARS = 6, MIN_RISK_PCT = 0.003;
+  var WICK_BARS = 96, WICK_MIN_ATR = 0.4, WICK_MAX_ATR = 1.0, LIQ_SAFETY = 1.5, BUCKET_MS = 15 * 60000;
 
   function median(a) { var b = a.slice().sort(function (x, y) { return x - y; }), n = b.length; return n % 2 ? b[(n - 1) / 2] : (b[n / 2 - 1] + b[n / 2]) / 2; }
   function clamp(x, lo, hi) { return Math.max(lo, Math.min(hi, x)); }
@@ -335,7 +351,27 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
     if (al === 0) return 100;
     return 100 - 100 / (1 + ag / al);
   }
+  var W_VOL = 30, W_BRK = 30, W_MOM = 25, W_BB = 15, MA_TREND_DAYS = 200;
   function volumeScore(r) { return r <= 1 ? 0 : 35 * clamp(Math.log(r) / Math.log(4), 0, 1); }
+  function bollinger(v, n) {
+    n = n || 20;
+    var w = v.slice(-n), mid = w.reduce(function (a, b) { return a + b; }, 0) / w.length;
+    var sd = Math.sqrt(w.reduce(function (a, b) { return a + (b - mid) * (b - mid); }, 0) / w.length);
+    var up = mid + 2 * sd, lo = mid - 2 * sd;
+    return { mid: mid, upper: up, lower: lo, width: mid ? (up - lo) / mid : 0, pctB: up > lo ? (v[v.length - 1] - lo) / (up - lo) : 0.5 };
+  }
+  function bbExpansion(closes, widthNow) {
+    var n = 20;
+    if (closes.length < 2 * n - 1) return 1;
+    var hist = [];
+    for (var i = closes.length - n; i < closes.length; i++) hist.push(bollinger(closes.slice(0, i + 1), n).width);
+    var base = median(hist);
+    return base > 0 ? widthNow / base : 1;
+  }
+  function bollingerScore(side, pctB, exp) {
+    var pos = side === 'long' ? (pctB - 0.5) / 0.5 : (0.5 - pctB) / 0.5;
+    return 10 * clamp(pos, 0, 1) + 5 * clamp((exp - 1) / 0.5, 0, 1);
+  }
   function breakoutScore(d) {
     if (d <= -0.08) return 0;
     if (d < 0) return 21 * (d + 0.08) / 0.08;
@@ -363,33 +399,38 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
     var high20 = maxOf(highs.slice(-20)), low20 = minOf(lows.slice(-20));
     var distHi = last / high20 - 1, distLo = last / low20 - 1;
     var ma20 = closes.slice(-20).reduce(function (a, b) { return a + b; }, 0) / 20;
+    var ma200 = closes.length >= MA_TREND_DAYS ? closes.slice(-MA_TREND_DAYS).reduce(function (a, b) { return a + b; }, 0) / MA_TREND_DAYS : null;
     var ret7 = last / closes[closes.length - 7] - 1, chg24 = last / open24 - 1;
     var rsi = rsi14(closes.concat([last]));
-    var sVol = volumeScore(ratio);
+    var bb = bollinger(closes.slice(-19).concat([last])), bbExp = bbExpansion(closes, bb.width);
+    var sVol = volumeScore(ratio) * W_VOL / 35;
 
     var lp = 0, lw = [];
     if (rsi != null && rsi >= 80) { lp += 15; lw.push('RSI 과열'); }
     if (chg24 >= 0.30) { lp += 15; lw.push('24h 급등'); }
     if (ret7 >= 0.60) { lp += 10; lw.push('7일 급등'); }
-    var lBrk = breakoutScore(distHi), lMom = momentumScore(ret7, last > ma20, rsi), lt = [];
+    var lBrk = breakoutScore(distHi) * W_BRK / 35, lMom = momentumScore(ret7, last > ma20, rsi) * W_MOM / 30, lBB = bollingerScore('long', bb.pctB, bbExp), lt = [];
     if (distHi >= 0) lt.push('돌파'); else if (distHi >= -0.03) lt.push('돌파 임박');
+    if (bb.pctB >= 1) lt.push('BB 상단 돌파');
 
     var sp = 0, sw = [];
     if (rsi != null && rsi <= 20) { sp += 15; sw.push('RSI 과매도'); }
     if (chg24 <= -0.30) { sp += 15; sw.push('24h 급락'); }
     if (ret7 <= -0.60) { sp += 10; sw.push('7일 급락'); }
-    var sBrk = breakoutScore(-distLo), sMom = momentumScore(-ret7, last < ma20, rsi == null ? null : 100 - rsi), st = [];
+    var sBrk = breakoutScore(-distLo) * W_BRK / 35, sMom = momentumScore(-ret7, last < ma20, rsi == null ? null : 100 - rsi) * W_MOM / 30, sBB = bollingerScore('short', bb.pctB, bbExp), st = [];
     if (distLo <= 0) st.push('이탈'); else if (distLo <= 0.03) st.push('이탈 임박');
+    if (bb.pctB <= 0) st.push('BB 하단 이탈');
+    var trendUp = ma200 != null && last > ma200, trendDn = ma200 != null && last < ma200;
     if (ratio >= 3) { lt.push('거래량 급증'); st.push('거래량 급증'); }
 
     return {
       inst: tk.instId, base: tk._base, last: last, chg24: chg24, vol24: vol24, ratio: ratio,
       distHi: distHi, distLo: distLo, ret7: ret7, rsi: rsi, aboveMa: last > ma20, funding: null, plan: null,
-      high20: high20, low20: low20,
-      long: { sVol: sVol, sBrk: lBrk, sMom: lMom, penalty: lp, score: Math.max(0, sVol + lBrk + lMom - lp), tags: lt, warns: lw,
-              eligible: ratio >= MIN_VOLUME_RATIO && distHi >= -NEAR_EDGE && last > ma20 },
-      short: { sVol: sVol, sBrk: sBrk, sMom: sMom, penalty: sp, score: Math.max(0, sVol + sBrk + sMom - sp), tags: st, warns: sw,
-               eligible: ratio >= MIN_VOLUME_RATIO && distLo <= NEAR_EDGE && last < ma20 },
+      high20: high20, low20: low20, ma200: ma200, distMa200: ma200 ? last / ma200 - 1 : null, bb: bb, bbExp: bbExp,
+      long: { sVol: sVol, sBrk: lBrk, sMom: lMom, sBB: lBB, penalty: lp, score: Math.max(0, sVol + lBrk + lMom + lBB - lp), tags: lt, warns: lw,
+              eligible: ratio >= MIN_VOLUME_RATIO && distHi >= -NEAR_EDGE && last > ma20 && trendUp },
+      short: { sVol: sVol, sBrk: sBrk, sMom: sMom, sBB: sBB, penalty: sp, score: Math.max(0, sVol + sBrk + sMom + sBB - sp), tags: st, warns: sw,
+               eligible: ratio >= MIN_VOLUME_RATIO && distLo <= NEAR_EDGE && last < ma20 && trendDn },
       spark: closes.slice(-29).concat([last])
     };
   }
@@ -404,10 +445,60 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
     for (i = period; i < trs.length; i++) a = (a * (period - 1) + trs[i]) / period;
     return a;
   }
-  function entryPlan(side, price, rows) {
+
+  function findPivots(highs, lows, left, right) {
+    var piv = [], n = highs.length;
+    for (var i = left; i < n - right; i++) {
+      var wh = highs.slice(i - left, i + right + 1);
+      if (highs[i] === maxOf(wh)) piv.push([i, highs[i], 'high']);
+      var wl = lows.slice(i - left, i + right + 1);
+      if (lows[i] === minOf(wl)) piv.push([i, lows[i], 'low']);
+    }
+    return piv;
+  }
+  function clusterLevels(points, tolPct) {
+    var pts = points.slice().sort(function (a, b) { return a[1] - b[1]; }), zones = [];
+    for (var i = 0; i < pts.length; i++) {
+      var idx = pts[i][0], level = pts[i][1], weight = pts[i][2], isDaily = pts[i][3];
+      var last = zones.length ? zones[zones.length - 1] : null;
+      if (last && Math.abs(level - last.level) <= tolPct * last.level) {
+        last.sum += level * weight; last.w += weight; last.level = last.sum / last.w;
+        last.n += 1; last.daily = last.daily || isDaily; last.lastIdx = Math.max(last.lastIdx, idx);
+      } else {
+        zones.push({ sum: level * weight, w: weight, level: level, n: 1, daily: isDaily, lastIdx: idx });
+      }
+    }
+    return zones;
+  }
+  function keyLevels(dailyConf, h4Conf, tolPct) {
+    tolPct = tolPct || 0.006;
+    var points = [];
+    if (dailyConf.length >= 5) {
+      var dh = dailyConf.slice(-120).map(function (r) { return parseFloat(r[2]); });
+      var dl = dailyConf.slice(-120).map(function (r) { return parseFloat(r[3]); });
+      findPivots(dh, dl, 2, 2).forEach(function (pv) { points.push([pv[0], pv[1], 2.0, true]); });
+    }
+    if (h4Conf.length >= 7) {
+      var hh = h4Conf.slice(-180).map(function (r) { return parseFloat(r[2]); });
+      var hl = h4Conf.slice(-180).map(function (r) { return parseFloat(r[3]); });
+      findPivots(hh, hl, 3, 3).forEach(function (pv) { points.push([pv[0], pv[1], 1.0, false]); });
+    }
+    if (!points.length) return [];
+    return clusterLevels(points, tolPct);
+  }
+  function nearestLevel(zones, price, above) {
+    var cands = zones.filter(function (z) { return above ? z.level > price * 1.0005 : z.level < price * 0.9995; });
+    if (!cands.length) return null;
+    return cands.reduce(function (best, z) {
+      if (!best) return z;
+      return above ? (z.level < best.level ? z : best) : (z.level > best.level ? z : best);
+    }, null);
+  }
+  function entryPlan(side, price, rows, rows4h, dailyRows, ma200) {
     rows = sortRows(rows);
     var conf = rows.filter(function (r) { return r[8] === '1'; });
     if (conf.length < 60) return null;
+    var opens = conf.map(function (r) { return parseFloat(r[1]); });
     var highs = conf.map(function (r) { return parseFloat(r[2]); });
     var lows = conf.map(function (r) { return parseFloat(r[3]); });
     var closes = conf.map(function (r) { return parseFloat(r[4]); });
@@ -415,33 +506,64 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
     var e20 = e20s[e20s.length - 1], e50 = e50s[e50s.length - 1];
     var atr = atrWilder(highs, lows, closes, 14);
     if (!atr || atr <= 0) return null;
+    var conf4 = sortRows((rows4h || []).filter(function (r) { return r[8] === '1'; }));
+    var confd = sortRows((dailyRows || []).filter(function (r) { return r[8] === '1'; }));
+    var atr4 = conf4.length >= 15 ? atrWilder(conf4.map(function (r) { return parseFloat(r[2]); }),
+      conf4.map(function (r) { return parseFloat(r[3]); }), conf4.map(function (r) { return parseFloat(r[4]); }), 14) : null;
+    var zones = keyLevels(confd, conf4);
     var rsi15 = rsi14(closes.concat([price]));
+    var bb = bollinger(closes.slice(-19).concat([price]));
+    var widths = [];
+    for (var wi = Math.max(19, closes.length - 96); wi < closes.length; wi++) widths.push(bollinger(closes.slice(0, wi + 1)).width);
+    widths.sort(function (a, b) { return a - b; });
+    var squeeze = widths.length > 0 && bb.width <= widths[Math.floor(0.2 * widths.length)];
     var plan = { side: side, valid: false, ema20: e20, ema50: e50, atr: atr, atrPct: atr / price, rsi15: rsi15,
-                 spark: closes.slice(-96).concat([price]), warns: [] };
+                 spark: closes.slice(-96).concat([price]), warns: [], bb: bb, squeeze: squeeze, ma200: ma200 == null ? null : ma200 };
     var isLong = side === 'long', trendOk;
     if (isLong) trendOk = price > e20 && e20 > e50 && e20 > e20s[e20s.length - 4];
     else trendOk = price < e20 && e20 < e50 && e20 < e20s[e20s.length - 4];
     if (!trendOk) return plan;
-    var hiN = maxOf(highs.slice(-SWING_BARS)), loN = minOf(lows.slice(-SWING_BARS)), kind, entry, stop, risk, targets, extreme;
+    var turn = nearestLevel(zones, price, isLong), anchor = nearestLevel(zones, price, !isLong);
+    var hiN, loN;
+    if (isLong) hiN = turn ? turn.level : maxOf(highs.slice(-SWING_BARS));
+    else loN = turn ? turn.level : minOf(lows.slice(-SWING_BARS));
+    var nearThresh = atr4 ? Math.max(3 * atr, 0.8 * atr4) : 3 * atr;
+    plan.level = isLong ? hiN : loN; plan.levelSrc = turn ? 'sr' : 'swing15';
+    plan.levelTouch = turn ? turn.n : 1; plan.levelDaily = !!(turn && turn.daily);
+    var kind, entry, stop, risk, targets, extreme, overRsi, overBB;
     if (isLong) {
-      extreme = rsi15 != null && rsi15 >= 78;
-      if (price < hiN && !extreme && hiN - price <= 3 * atr) { kind = 'stop'; entry = hiN + 0.1 * atr; }
+      overRsi = rsi15 != null && rsi15 >= 78; overBB = bb.pctB >= 1; extreme = overRsi || overBB;
+      if (price < hiN && !extreme && hiN - price <= nearThresh) { kind = 'stop'; entry = hiN + 0.1 * atr; }
       else { kind = 'limit'; entry = price >= hiN ? Math.max(hiN, e20) : e20; }
-      var swing = minOf(lows.slice(-STOP_BARS)) - 0.1 * atr;
+      var swing = anchor ? (anchor.level - 0.1 * atr) : (minOf(lows.slice(-STOP_BARS)) - 0.1 * atr);
       stop = Math.max(entry - 2 * atr, Math.min(swing, entry - 0.8 * atr));
       risk = entry - stop;
       targets = TP_R.map(function (k) { return entry + k * risk; });
     } else {
-      extreme = rsi15 != null && rsi15 <= 22;
-      if (price > loN && !extreme && price - loN <= 3 * atr) { kind = 'stop'; entry = loN - 0.1 * atr; }
+      overRsi = rsi15 != null && rsi15 <= 22; overBB = bb.pctB <= 0; extreme = overRsi || overBB;
+      if (price > loN && !extreme && price - loN <= nearThresh) { kind = 'stop'; entry = loN - 0.1 * atr; }
       else { kind = 'limit'; entry = price <= loN ? Math.min(loN, e20) : e20; }
-      var swing2 = maxOf(highs.slice(-STOP_BARS)) + 0.1 * atr;
+      var swing2 = anchor ? (anchor.level + 0.1 * atr) : (maxOf(highs.slice(-STOP_BARS)) + 0.1 * atr);
       stop = Math.min(entry + 2 * atr, Math.max(swing2, entry + 0.8 * atr));
       risk = stop - entry;
       targets = TP_R.map(function (k) { return Math.max(entry - k * risk, 0); });
     }
+    if (ma200 != null && ((isLong && entry <= ma200) || (!isLong && entry >= ma200))) { plan.reason = 'ma200'; plan.entry = entry; return plan; }
+    /* 손절 헌팅 방어: 꼬리 길이 90분위수만큼 바깥에 강제 손절(주문용)을 둔다. 손절선은 15분 종가 기준으로만 쓴다 */
+    var wicks = [], n0 = Math.max(0, conf.length - WICK_BARS);
+    for (var wj = n0; wj < conf.length; wj++) wicks.push(isLong ? Math.min(opens[wj], closes[wj]) - lows[wj] : highs[wj] - Math.max(opens[wj], closes[wj]));
+    wicks.sort(function (a, b) { return a - b; });
+    var wick = wicks[Math.min(wicks.length - 1, Math.floor(0.9 * wicks.length))];
+    var buf = clamp(wick, WICK_MIN_ATR * atr, WICK_MAX_ATR * atr);
+    var hard = isLong ? Math.max(stop - buf, stop * 0.5) : stop + buf;
+    var riskHard = isLong ? entry - hard : hard - entry;
+    plan.hard = hard; plan.wick = wick; plan.hardPct = riskHard / entry; plan.sizeMult = Math.min(1, risk / riskHard);
+    plan.levMax = Math.floor(clamp(1 / (LIQ_SAFETY * riskHard / entry), 1, 125));
     plan.valid = true; plan.kind = kind; plan.entry = entry; plan.stop = stop; plan.tp = targets; plan.riskPct = risk / entry;
-    if (extreme) plan.warns.push(isLong ? '15분 과열' : '15분 과매도');
+    if (overRsi) plan.warns.push(isLong ? '15분 과열' : '15분 과매도');
+    if (overBB) plan.warns.push(isLong ? '볼린저 상단 밖(추격 금지)' : '볼린저 하단 밖(추격 금지)');
+    if (isLong && targets[0] > bb.upper) plan.warns.push('목표1이 볼린저 상단 위');
+    if (!isLong && targets[0] < bb.lower) plan.warns.push('목표1이 볼린저 하단 아래');
     if (plan.riskPct < MIN_RISK_PCT) plan.warns.push('손절폭 좁음(수수료 부담)');
     return plan;
   }
@@ -541,7 +663,7 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
         var inst = u.t.instId, c = dailyCache[inst], rows = null;
         if (c && Date.now() - c.t < 3600e3) rows = c.rows;
         else {
-          try { rows = await okx('/api/v5/market/candles', { instId: inst, bar: '1D', limit: '45' }, { gate: gate }); dailyCache[inst] = { t: Date.now(), rows: rows }; }
+          try { rows = await okx('/api/v5/market/candles', { instId: inst, bar: '1D', limit: '220' }, { gate: gate }); dailyCache[inst] = { t: Date.now(), rows: rows }; }
           catch (e) { rows = null; }
         }
         if (rows) {
@@ -564,7 +686,9 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
         var m = p[0], side = p[1];
         try {
           var r15 = await okx('/api/v5/market/candles', { instId: m.inst, bar: '15m', limit: '120' }, { gate: gate });
-          m.plan = entryPlan(side, m.last, r15);
+          var r4h = await okx('/api/v5/market/candles', { instId: m.inst, bar: '4H', limit: '180' }, { gate: gate });
+          var dRows = dailyCache[m.inst] ? dailyCache[m.inst].rows : [];
+          m.plan = entryPlan(side, m.last, r15, r4h, dRows, m.ma200);
         } catch (e) { m.plan = null; }
         if (swap) {
           try { var fr = await okx('/api/v5/public/funding-rate', { instId: m.inst }, { tries: 2, gate: fundGate }); m.funding = parseFloat(fr[0].fundingRate); }
@@ -577,7 +701,9 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
       state.longs = longs; state.shorts = shorts; state.nLong = longOk.length; state.nShort = shortOk.length;
       state.scanned = results.length; state.builtAt = Date.now();
       state.breadth = results.filter(function (r) { return r.aboveMa; }).length / results.length;
+      state.noMa200 = results.filter(function (r) { return r.ma200 == null; }).length;
       render();
+      if (state.noMa200) showNotice('상장 200일 미만인 ' + state.noMa200 + '종목은 200일선을 계산할 수 없어 후보에서 뺐어요. (큰 추세를 알 수 없는 종목은 진입하지 않아요)');
       setProgress(1);
       setTimeout(function () { $('prog').style.width = '0'; }, 600);
     } catch (e) {
@@ -618,17 +744,29 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
     var vals = p && p.spark ? p.spark : m.spark;
     var label = p && p.spark ? '최근 24시간 15분봉 종가 추이' : '최근 30일 종가 추이';
     var attrs = ' data-inst="' + esc(m.inst) + '" data-side="' + side + '" data-tv="' + esc(tvSymbol(m.inst)) + '" data-edge="' + edge +
-      '" data-last="' + m.last + '" data-label="' + esc(m.base) + '"';
+      '" data-last="' + m.last + '" data-ma200="' + m.ma200 + '" data-label="' + esc(m.base) + '"';
     var pill, planHTML;
     if (p && p.valid) {
       var e = p.entry, st = p.stop, t1 = p.tp[0], t2 = p.tp[1];
-      attrs += ' data-kind="' + p.kind + '" data-entry="' + e + '" data-stop="' + st + '" data-tp1="' + t1 + '" data-tp2="' + t2 + '" data-atr="' + p.atr + '"';
+      attrs += ' data-sizemult="' + p.sizeMult.toFixed(2) + '" data-kind="' + p.kind + '" data-entry="' + e + '" data-stop="' + st + '" data-hard="' + p.hard + '" data-tp1="' + t1 + '" data-tp2="' + t2 + '" data-atr="' + p.atr + '"';
       pill = '<span class="pstat" data-st="wait">계산 중</span>';
-      planHTML = '<div class="plan"><span class="k">진입</span><b>' + fmtPrice(e) + '</b><em class="p-edist" title="현재가 대비">' + fmtPct(e / m.last - 1) + '</em>' +
-        '<span class="k">손절</span><b>' + fmtPrice(st) + '</b><em title="진입가 대비">' + fmtPct(st / e - 1) + '</em>' +
+      var lvlNote;
+      if (p.levelSrc === 'sr') {
+        var lvlWord = side === 'long' ? '저항' : '지지';
+        lvlNote = lvlWord + ' ' + fmtPrice(p.level) + ' (' + (p.levelDaily ? '일봉 · ' : '4시간봉 · ') + p.levelTouch + '회 접촉)';
+      } else {
+        lvlNote = '뚜렷한 4h/일봉 구간 없음 · 15분봉 최근 스윙 사용';
+      }
+      planHTML = '<div class="pnote lvl">' + esc(lvlNote) + '</div>' +
+        '<div class="plan"><span class="k">진입</span><b>' + fmtPrice(e) + '</b><em class="p-edist" title="현재가 대비">' + fmtPct(e / m.last - 1) + '</em>' +
+        '<span class="k">손절선</span><b>' + fmtPrice(st) + '</b><em title="15분봉 종가가 이 선을 넘으면 손절 (꼬리만 찍으면 유지)">종가 기준 ' + fmtPct(st / e - 1) + '</em>' +
+        '<span class="k">강제</span><b>' + fmtPrice(p.hard) + '</b><em title="거래소에 미리 걸어두는 손절 주문 (꼬리 바깥)">주문 ' + fmtPct(p.hard / e - 1) + '</em>' +
         '<span class="k">목표</span><b>' + fmtPrice(t1) + ' / ' + fmtPrice(t2) + '</b><em>' + fmtPct(t1 / e - 1) + ' / ' + fmtPct(t2 / e - 1) + '</em></div>' +
-        '<div class="pnote">' + kindLabel(p.kind, side) + ' · 15분 ATR ' + (p.atrPct * 100).toFixed(2) + '% · RSI ' + (p.rsi15 == null ? '-' : Math.round(p.rsi15)) + ' · EMA20 ' + fmtPrice(p.ema20) + '</div>' +
+        '<div class="pnote">' + kindLabel(p.kind, side) + ' · 수량 x' + p.sizeMult.toFixed(2) + ' · 최대 레버리지 ' + p.levMax + 'x<br>15분 ATR ' + (p.atrPct * 100).toFixed(2) + '% · RSI ' + (p.rsi15 == null ? '-' : Math.round(p.rsi15)) + ' · EMA20 ' + fmtPrice(p.ema20) + '<br>볼린저 %B ' + p.bb.pctB.toFixed(2) + ' · 밴드폭 ' + (p.bb.width * 100).toFixed(1) + '%' + (p.squeeze ? ' · 스퀴즈(수축)' : '') + '</div>' +
         (p.warns.length ? '<div class="tags">' + p.warns.map(function (w) { return '<span class="tag t-warn">' + esc(w) + '</span>'; }).join('') + '</div>' : '');
+    } else if (p && p.reason === 'ma200') {
+      pill = '<span class="pstat" data-st="none">200일선 ' + (side === 'long' ? '아래' : '위') + ' · 진입 안 함</span>';
+      planHTML = '<div class="pnone pnote">진입가 ' + fmtPrice(p.entry) + '가 200일선 ' + fmtPrice(p.ma200) + '을 거스르는 자리예요. 큰 추세에 반하는 ' + (side === 'long' ? '롱' : '숏') + '은 만들지 않아요.</div>';
     } else if (p) {
       pill = '<span class="pstat" data-st="none">15분 추세 미충족</span>';
       planHTML = '<div class="pnone pnote">종가가 EMA20 ' + fmtPrice(p.ema20) + (side === 'long' ? ' 위로 복귀하면' : ' 아래로 내려가면') + ' 재확인 · 15분 ATR ' + (p.atrPct * 100).toFixed(2) + '%</div>';
@@ -642,12 +780,13 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
       '<div class="c-head"><span class="rank">' + rank + '</span><span class="name"><b>' + esc(m.base) + '</b><small>' + esc(suffix) + '</small></span>' + pill + '</div>' +
       '<div class="c-price"><span class="p-last">' + fmtPrice(m.last) + '</span><span class="p-chg ' + cls(m.chg24) + '">' + fmtPct(m.chg24) + '</span>' + sparkline(vals, label) + '</div>' +
       planHTML +
-      '<div class="c-score"><div class="scorebar" title="거래량 ' + Math.round(s.sVol) + ' · 돌파 ' + Math.round(s.sBrk) + ' · 모멘텀 ' + Math.round(s.sMom) + '">' +
-      '<i class="s1" style="width:' + s.sVol.toFixed(1) + '%"></i><i class="s2" style="width:' + s.sBrk.toFixed(1) + '%"></i><i class="s3" style="width:' + s.sMom.toFixed(1) + '%"></i></div>' +
+      '<div class="c-score"><div class="scorebar" title="거래량 ' + Math.round(s.sVol) + ' · 돌파 ' + Math.round(s.sBrk) + ' · 모멘텀 ' + Math.round(s.sMom) + ' · 볼린저 ' + Math.round(s.sBB) + '">' +
+      '<i class="s1" style="width:' + s.sVol.toFixed(1) + '%"></i><i class="s2" style="width:' + s.sBrk.toFixed(1) + '%"></i><i class="s3" style="width:' + s.sMom.toFixed(1) + '%"></i><i class="s4" style="width:' + s.sBB.toFixed(1) + '%"></i></div>' +
       '<span class="scorenum"><b>' + Math.round(s.score) + '</b>점</span>' + (s.penalty ? '<span class="pen">-' + Math.round(s.penalty) + '</span>' : '') + '</div>' +
       '<div class="tags">' + tags + '</div>' +
       '<div class="c-meta"><span>거래대금 <b>' + m.ratio.toFixed(1) + 'x</b> (' + fmtMoney(m.vol24) + ')</span>' +
       '<span>20일 ' + (side === 'long' ? '고점' : '저점') + ' <b class="p-dist ' + cls(dist) + '">' + fmtPct(dist) + '</b></span>' +
+      '<span>200일선 <b class="p-ma200 ' + cls(m.distMa200) + '">' + fmtPct(m.distMa200) + '</b></span>' +
       '<span>7일 <b class="' + cls(m.ret7) + '">' + fmtPct(m.ret7) + '</b></span><span>RSI(일) <b>' + (m.rsi == null ? '-' : Math.round(m.rsi)) + '</b></span></div>' +
       '<div class="c-links"><a href="https://www.okx.com/' + trade + '/' + esc(m.inst.toLowerCase()) + '" target="_blank" rel="noopener">OKX 거래 &#8599;</a></div>' +
       '</article>';
@@ -664,8 +803,8 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
     indexCards();
     [].slice.call(document.querySelectorAll('.card[data-inst]')).forEach(function (c) {
       var px = live.px[c.dataset.inst];
-      if (px != null && isFinite(px)) paintCard(c, px, live.open[c.dataset.inst], false);
-      else applyPlan(c, parseFloat(c.dataset.last), false);
+      if (px != null && isFinite(px)) paintCard(c, px, live.open[c.dataset.inst], false, true);
+      else applyPlan(c, parseFloat(c.dataset.last), true);
     });
     updateScanInfo();
     syncSubs();
@@ -684,33 +823,41 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
     byInst = {};
     [].slice.call(document.querySelectorAll('.card[data-inst]')).forEach(function (c) { (byInst[c.dataset.inst] = byInst[c.dataset.inst] || []).push(c); });
   }
-  function planStatus(side, kind, P, entry, stop, tp1, A) {
+  function planStatus(side, kind, P, entry, stop, tp1, A, ma, hard, closed) {
     var isLong = side === 'long', lo, hi;
+    if (isFinite(ma) && (isLong ? P <= ma : P >= ma)) return ['void', isLong ? '무효 · 200일선 아래' : '무효 · 200일선 위'];
     if (kind === 'stop') { if (isLong) { lo = entry; hi = entry + 0.5 * A; } else { lo = entry - 0.5 * A; hi = entry; } }
     else { lo = entry - 0.25 * A; hi = entry + 0.25 * A; }
     if (isLong) {
-      if (P <= stop) return ['void', '무효 · 손절선 이탈'];
+      if (isFinite(hard) && P <= hard) return ['void', '무효 · 강제손절 이탈'];
+      if (closed) return ['void', '무효 · 15분 종가 손절'];
+      if (P <= stop) return ['touch', '손절선 터치 · 15분 종가 확인'];
       if (P >= tp1) return ['late', '추격 금지 · 목표 도달'];
       if (P >= lo && P <= hi) return ['go', '진입 구간'];
       if (P > hi) return kind === 'stop' ? ['late', '추격 금지 · 이미 돌파'] : ['wait', '눌림 대기'];
       return kind === 'stop' ? ['wait', '돌파 대기'] : ['warn', '눌림 깊음 · 반등 확인'];
     }
-    if (P >= stop) return ['void', '무효 · 손절선 이탈'];
+    if (isFinite(hard) && P >= hard) return ['void', '무효 · 강제손절 이탈'];
+    if (closed) return ['void', '무효 · 15분 종가 손절'];
+    if (P >= stop) return ['touch', '손절선 터치 · 15분 종가 확인'];
     if (P <= tp1) return ['late', '추격 금지 · 목표 도달'];
     if (P >= lo && P <= hi) return ['go', '진입 구간'];
     if (P < lo) return kind === 'stop' ? ['late', '추격 금지 · 이미 이탈'] : ['wait', '반등 대기'];
     return kind === 'stop' ? ['wait', '이탈 대기'] : ['warn', '반등 과함 · 하락 확인'];
   }
-  var lastAlert = {};
+  var lastAlert = {}, statusMem = {};
   function applyPlan(card, P, allowAlert) {
     if (!card.dataset.kind || !isFinite(P)) return;
-    var entry = parseFloat(card.dataset.entry);
-    var r = planStatus(card.dataset.side, card.dataset.kind, P, entry, parseFloat(card.dataset.stop), parseFloat(card.dataset.tp1), parseFloat(card.dataset.atr));
-    var st = card.querySelector('.pstat'), prev = st ? st.dataset.st : null;
+    var entry = parseFloat(card.dataset.entry), key = card.dataset.inst + '|' + card.dataset.side;
+    var r = planStatus(card.dataset.side, card.dataset.kind, P, entry, parseFloat(card.dataset.stop), parseFloat(card.dataset.tp1), parseFloat(card.dataset.atr),
+                       parseFloat(card.dataset.ma200), parseFloat(card.dataset.hard), card.dataset.closed === '1');
+    var st = card.querySelector('.pstat'), prev = statusMem[key];
     if (st) { st.dataset.st = r[0]; st.textContent = r[1]; }
     var ed = card.querySelector('.p-edist');
     if (ed) ed.textContent = fmtPct(entry / P - 1);
-    if (allowAlert && r[0] === 'go' && prev && prev !== 'go' && prev !== 'wait-init') fireAlert(card, P);
+    statusMem[key] = r[0];
+    if (r[0] === 'go') card.dataset.zoned = '1';
+    if (allowAlert && r[0] === 'go' && prev !== 'go') fireAlert(card, P, 'entry');
   }
   function flash(el, dir) {
     if (reduce) return;
@@ -718,7 +865,7 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
     el.classList.add(dir === 'up' ? 'tick-up' : 'tick-down');
     setTimeout(function () { el.classList.remove('tick-up', 'tick-down'); }, 300);
   }
-  function paintCard(card, last, open, animate) {
+  function paintCard(card, last, open, animate, alertOn) {
     var pe = card.querySelector('.p-last'), prev = parseFloat(card.dataset.cur || card.dataset.last);
     pe.textContent = fmtPrice(last);
     if (animate && isFinite(prev) && last !== prev) flash(pe, last > prev ? 'up' : 'down');
@@ -732,13 +879,36 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
       var de = card.querySelector('.p-dist'), dd = last / edge - 1;
       if (de) { de.textContent = fmtPct(dd); de.className = 'p-dist ' + cls(dd); }
     }
-    applyPlan(card, last, animate);
+    var ma = parseFloat(card.dataset.ma200);
+    if (ma > 0) {
+      var me = card.querySelector('.p-ma200'), dm = last / ma - 1;
+      if (me) { me.textContent = fmtPct(dm); me.className = 'p-ma200 ' + cls(dm); }
+    }
+    applyPlan(card, last, animate || alertOn);
+  }
+  /* 15분봉 종가 감지: 웹소켓 시세로 15분 구간이 바뀔 때 직전 구간의 마지막 가격을 종가로 본다(근사값) */
+  var bucket = {};
+  function trackClose(inst, last, ts) {
+    var id = Math.floor((isFinite(ts) ? ts : Date.now()) / BUCKET_MS), b = bucket[inst];
+    if (b && id > b.id) {
+      var close = b.last;
+      (byInst[inst] || []).forEach(function (c) {
+        if (!c.dataset.kind || c.dataset.closed === '1') return;
+        var stop = parseFloat(c.dataset.stop), isLong = c.dataset.side === 'long';
+        if (isLong ? close <= stop : close >= stop) {
+          c.dataset.closed = '1';
+          if (c.dataset.zoned === '1') fireAlert(c, close, 'stop');
+        }
+      });
+    }
+    if (!b || id >= b.id) bucket[inst] = { id: id, last: last };
   }
   var openInst = null;
   function onTicker(d) {
     var last = parseFloat(d.last), open = parseFloat(d.open24h);
     if (!isFinite(last)) return;
     live.px[d.instId] = last; if (isFinite(open)) live.open[d.instId] = open;
+    trackClose(d.instId, last, parseInt(d.ts, 10));
     (byInst[d.instId] || []).forEach(function (c) { paintCard(c, last, open, true); });
     if (openInst === d.instId) $('dlg-price').textContent = fmtPrice(last);
   }
@@ -761,18 +931,44 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
     var t = $('toast'); t.textContent = msg; t.hidden = false;
     clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.hidden = true; }, 5000);
   }
-  function fireAlert(card, P) {
+  /* 폰으로 보내는 메시지 (텔레그램 / ntfy). 앱이 열려 있는 동안 발송돼요 */
+  function remoteConfigured() { return !!((S.tgToken && S.tgChat) || S.ntfyTopic); }
+  function sendRemote(title, text) {
+    var jobs = [];
+    if (S.tgToken && S.tgChat) {
+      var body = new URLSearchParams(); body.set('chat_id', S.tgChat); body.set('text', title + '\n' + text);
+      jobs.push(fetch('https://api.telegram.org/bot' + encodeURIComponent(S.tgToken) + '/sendMessage', { method: 'POST', body: body })
+        .then(function (r) { return r.json().then(function (j) { if (!j.ok) throw new Error(j.description || 'telegram'); return 'telegram'; }); }));
+    }
+    if (S.ntfyTopic) {
+      jobs.push(fetch('https://ntfy.sh/' + encodeURIComponent(S.ntfyTopic) + '?title=' + encodeURIComponent(title) + '&priority=high', { method: 'POST', body: text })
+        .then(function (r) { if (!r.ok) throw new Error('ntfy ' + r.status); return 'ntfy'; }));
+    }
+    return Promise.all(jobs.map(function (j) { return j.then(function (v) { return { ok: true, ch: v }; }, function (e) { return { ok: false, err: (e && e.message) || 'error' }; }); }));
+  }
+  function alertText(card, P, kind) {
+    var side = card.dataset.side === 'long' ? '롱' : '숏', name = card.dataset.label;
+    var f = function (k) { return fmtPrice(parseFloat(card.dataset[k])); };
+    if (kind === 'stop') {
+      return { title: name + ' ' + side + ' 손절 신호', text: '15분봉 종가 ' + fmtPrice(P) + ' 가 손절선 ' + f('stop') + ' 을 넘었어요. 종가 기준 손절 신호예요. (강제 손절 주문 ' + f('hard') + ')' };
+    }
+    var sm = card.dataset.sizemult ? ' · 수량 x' + card.dataset.sizemult : '';
+    return { title: name + ' ' + side + ' 진입 구간', text: '현재가 ' + fmtPrice(P) + ' · 진입 ' + f('entry') + ' · 손절선(15분 종가) ' + f('stop') + ' · 강제 손절 ' + f('hard') +
+             ' · 목표 ' + f('tp1') + ' / ' + f('tp2') + sm };
+  }
+  function fireAlert(card, P, kind) {
+    var inst = card.dataset.inst, now = Date.now(), key = inst + '|' + card.dataset.side + '|' + kind;
+    if (lastAlert[key] && now - lastAlert[key] < (kind === 'stop' ? 30 : 10) * 60000) return;
+    lastAlert[key] = now;
+    var t = alertText(card, P, kind);
+    if (remoteConfigured()) sendRemote(t.title, t.text);
     if (!S.alerts) return;
-    var inst = card.dataset.inst, now = Date.now();
-    if (lastAlert[inst] && now - lastAlert[inst] < 10 * 60000) return;
-    lastAlert[inst] = now;
-    var msg = card.dataset.label + ' ' + (card.dataset.side === 'long' ? '롱' : '숏') + ' 진입 구간 · ' + fmtPrice(P);
-    toast(msg);
+    toast(t.title + ' · ' + fmtPrice(P));
     try { if (navigator.vibrate) navigator.vibrate([150, 80, 150]); } catch (e) { /* 무시 */ }
     beep();
     try {
       if (window.Notification && Notification.permission === 'granted' && navigator.serviceWorker) {
-        navigator.serviceWorker.getRegistration().then(function (reg) { if (reg) reg.showNotification('롱숏 스크리너', { body: msg, tag: inst, icon: 'icon-192.png' }); });
+        navigator.serviceWorker.getRegistration().then(function (reg) { if (reg) reg.showNotification('롱숏 스크리너', { body: t.title + ' · ' + t.text, tag: inst + kind, icon: 'icon-192.png' }); });
       }
     } catch (e) { /* 무시 */ }
   }
@@ -907,7 +1103,7 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
   function fillForm() {
     $('f-market').value = S.market; $('f-top').value = String(S.top); $('f-minvol').value = String(S.minVol);
     $('f-universe').value = String(S.universe); $('f-auto').value = String(S.autoMin); $('f-colors').value = S.colors;
-    $('f-alerts').checked = !!S.alerts; $('f-layout').value = S.layout || ''; $('f-api').value = S.apiBase || '';
+    $('f-alerts').checked = !!S.alerts; $('f-ntfy').value = S.ntfyTopic || ''; $('f-tgtoken').value = S.tgToken || ''; $('f-tgchat').value = S.tgChat || ''; $('f-layout').value = S.layout || ''; $('f-api').value = S.apiBase || '';
     var supported = !!window.Notification;
     $('btn-notify').hidden = !supported;
     $('notify-note').textContent = supported ? (Notification.permission === 'granted' ? '시스템 알림이 켜져 있어요.' : '브라우저 알림 권한을 요청해요. 안 켜도 앱 안에서는 알려요.') : '이 브라우저는 시스템 알림을 지원하지 않아요.';
@@ -918,13 +1114,43 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
     if (!window.Notification) return;
     Notification.requestPermission().then(function (p) { $('notify-note').textContent = p === 'granted' ? '시스템 알림이 켜졌어요.' : '알림 권한이 허용되지 않았어요. 브라우저 설정에서 바꿀 수 있어요.'; });
   });
+  function remoteNote(t) { $('remote-note').textContent = t; }
+  $('btn-ntfy-gen').addEventListener('click', function () {
+    var a = 'abcdefghijklmnopqrstuvwxyz0123456789', out = '', buf = new Uint8Array(12);
+    try { crypto.getRandomValues(buf); } catch (e) { for (var i = 0; i < 12; i++) buf[i] = Math.floor(Math.random() * 256); }
+    for (var j = 0; j < 12; j++) out += a.charAt(buf[j] % a.length);
+    $('f-ntfy').value = 'longshort-' + out;
+    remoteNote('주제 이름 ' + $('f-ntfy').value + ' 을(를) ntfy 앱에서 구독하세요.');
+  });
+  $('btn-tg-find').addEventListener('click', function () {
+    var tok = $('f-tgtoken').value.trim();
+    if (!tok) { remoteNote('먼저 봇 토큰을 넣어 주세요.'); return; }
+    remoteNote('찾는 중...');
+    fetch('https://api.telegram.org/bot' + encodeURIComponent(tok) + '/getUpdates').then(function (r) { return r.json(); }).then(function (j) {
+      if (!j.ok) throw new Error(j.description || 'error');
+      var id = null;
+      (j.result || []).forEach(function (u) { var m = u.message || u.channel_post; if (m && m.chat) id = m.chat.id; });
+      if (id == null) remoteNote('아직 봇이 받은 메시지가 없어요. 텔레그램에서 봇에게 아무 말이나 보낸 뒤 다시 눌러 주세요.');
+      else { $('f-tgchat').value = String(id); remoteNote('채팅 ID ' + id + ' 를 찾았어요.'); }
+    }).catch(function (e) { remoteNote('못 찾았어요: ' + ((e && e.message) || '네트워크 오류')); });
+  });
+  $('btn-remote-test').addEventListener('click', function () {
+    var keep = [S.tgToken, S.tgChat, S.ntfyTopic];
+    S.tgToken = $('f-tgtoken').value.trim(); S.tgChat = $('f-tgchat').value.trim(); S.ntfyTopic = $('f-ntfy').value.trim();
+    if (!remoteConfigured()) { remoteNote('ntfy 주제 이름이나 텔레그램 토큰·채팅 ID를 먼저 넣어 주세요.'); S.tgToken = keep[0]; S.tgChat = keep[1]; S.ntfyTopic = keep[2]; return; }
+    remoteNote('보내는 중...');
+    sendRemote('롱숏 스크리너 테스트', '이 메시지가 보이면 설정이 맞아요.').then(function (res) {
+      remoteNote(res.map(function (r) { return r.ok ? (r.ch === 'telegram' ? '텔레그램 성공' : 'ntfy 성공') : '실패(' + r.err + ')'; }).join(' · '));
+    });
+    S.tgToken = keep[0]; S.tgChat = keep[1]; S.ntfyTopic = keep[2];
+  });
   function applyColors() { document.documentElement.setAttribute('data-colors', S.colors === 'gc' ? 'gc' : 'kr'); }
   $('setform').addEventListener('submit', function (e) {
     e.preventDefault();
     var before = JSON.stringify([S.market, S.top, S.minVol, S.universe, S.apiBase]);
     S.market = $('f-market').value; S.top = parseInt($('f-top').value, 10); S.minVol = parseFloat($('f-minvol').value);
     S.universe = parseInt($('f-universe').value, 10); S.autoMin = parseInt($('f-auto').value, 10); S.colors = $('f-colors').value;
-    S.alerts = $('f-alerts').checked; S.layout = $('f-layout').value.trim(); S.apiBase = $('f-api').value.trim();
+    S.alerts = $('f-alerts').checked; S.ntfyTopic = $('f-ntfy').value.trim(); S.tgToken = $('f-tgtoken').value.trim(); S.tgChat = $('f-tgchat').value.trim(); S.layout = $('f-layout').value.trim(); S.apiBase = $('f-api').value.trim();
     saveSettings(); applyColors();
     if (setdlg.close) setdlg.close(); else setdlg.removeAttribute('open');
     if (before !== JSON.stringify([S.market, S.top, S.minVol, S.universe, S.apiBase])) { live.px = {}; live.open = {}; runScan(); }

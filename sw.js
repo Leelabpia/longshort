@@ -1,5 +1,5 @@
 /* 앱 껍데기만 캐시한다. 시세(OKX)와 TradingView 요청은 건드리지 않는다. */
-var CACHE = 'longshort-v1';
+var CACHE = 'longshort-v4';
 var SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png'];
 
 self.addEventListener('install', function (e) {
