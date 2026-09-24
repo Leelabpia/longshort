@@ -1,0 +1,17 @@
+{
+  "name": "롱숏 스크리너",
+  "short_name": "롱숏",
+  "description": "OKX 선물 롱·숏 후보와 15분봉 진입가를 실시간으로 보여줘요",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0D1115",
+  "theme_color": "#0D1115",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
