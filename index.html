@@ -19,6 +19,7 @@
   --live: #1F9D6B; --on-live: #FFFFFF; --sel: #EAF4F1;
   --s1: #0E6B5B; --s2: #35A08D; --s3: #9DD3C7; --s4: #C9A227;
   --warn-bg: #FBE9D6; --warn-ink: #8A4A0B; --tag-bg: #E6EBF0; --tag-ink: #2A3542;
+  --surge: #9A4FE0; --surge-bg: #F1E4FB; --surge-ink: #5B238C;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
@@ -28,6 +29,7 @@
     --live: #3DD69A; --on-live: #10141A; --sel: #1B2B29;
     --s1: #1FA089; --s2: #58C4B0; --s3: #A8E2D5; --s4: #E3C25A;
     --warn-bg: #3A2A16; --warn-ink: #F2B877; --tag-bg: #212A33; --tag-ink: #C9D2DB;
+    --surge: #C48CF0; --surge-bg: #2E1E3D; --surge-ink: #D9B6F5;
     color-scheme: dark;
   }
 }
@@ -81,10 +83,13 @@ button { font: inherit; color: inherit; }
 section { display: flex; flex-direction: column; gap: 10px; padding-top: 12px; }
 .sechead { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
 .badge { font-weight: 800; font-size: 12px; letter-spacing: .08em; padding: 3px 10px; border-radius: 4px; color: var(--on-side); }
-.badge.long { background: var(--up); } .badge.short { background: var(--down); }
+.badge.long { background: var(--up); } .badge.short { background: var(--down); } .badge.surge { background: var(--surge); }
+.tag.t-surge-up, .tag.t-surge-down { background: var(--surge-bg); color: var(--surge-ink); }
+.card.surge .why { background: var(--surge-bg); color: var(--surge-ink); border-radius: 6px; padding: 6px 8px; }
 .sechead h2 { margin: 0; font-size: 16px; }
 .sechead span.sub { color: var(--muted); font-size: 12.5px; }
 .app[data-tab="long"] #sec-short, .app[data-tab="short"] #sec-long { display: none; }
+#sec-surge { grid-column: 1 / -1; }
 @media (min-width: 900px) {
   .tabs { display: none; }
   .lists { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
@@ -202,6 +207,10 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
     <section id="sec-short" aria-labelledby="h-short">
       <div class="sechead"><span class="badge short">SHORT</span><h2 id="h-short">숏 후보</h2><span class="sub" id="sub-short">20일 저점 이탈 · 200일선 아래</span></div>
       <div class="cards" id="cards-short"><div class="skeleton"></div><div class="skeleton"></div></div>
+    </section>
+    <section id="sec-surge" hidden aria-labelledby="h-surge">
+      <div class="sechead"><span class="badge surge">급등감지</span><h2 id="h-surge">급등·급락 감지 <span id="cnt-surge">0</span></h2><span class="sub">거래대금 4배 이상 + 이례적 변동 — 뉴스·이벤트 가능성 (참고용, 매매 신호 아님)</span></div>
+      <div class="cards" id="cards-surge"></div>
     </section>
   </main>
 
@@ -331,6 +340,7 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
   /* ------------------------------------------------ 분석 (파이썬 스크립트와 같은 규칙) */
   var STABLES = {}; 'USDC DAI TUSD FDUSD USDD PYUSD USDG USDE USDT EURC EUR USDP BUSD GUSD LUSD FRAX USD1 RLUSD'.split(' ').forEach(function (s) { STABLES[s] = 1; });
   var MIN_VOLUME_RATIO = 1.5, NEAR_EDGE = 0.05, FUNDING_ADVERSE = 0.0003;
+  var SURGE_VOL_RATIO = 4.0, SURGE_CHG24 = 0.15, SURGE_RET7 = 0.30, SURGE_TOP_N = 8;
   var TP_R = [1.0, 2.0], SWING_BARS = 16, STOP_BARS = 6, MIN_RISK_PCT = 0.003;
   var WICK_BARS = 96, WICK_MIN_ATR = 0.4, WICK_MAX_ATR = 1.0, LIQ_SAFETY = 1.5, BUCKET_MS = 15 * 60000;
 
@@ -426,9 +436,14 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
     var trendUp = ma200 != null && last > ma200, trendDn = ma200 != null && last < ma200;
     if (ratio >= 3) { lt.push('거래량 급증'); st.push('거래량 급증'); }
 
+    var surgeUp = ratio >= SURGE_VOL_RATIO && (chg24 >= SURGE_CHG24 || ret7 >= SURGE_RET7);
+    var surgeDn = ratio >= SURGE_VOL_RATIO && (chg24 <= -SURGE_CHG24 || ret7 <= -SURGE_RET7);
+    var surgeScore = ratio * Math.max(Math.abs(chg24), Math.abs(ret7) / 2);
+
     return {
       inst: tk.instId, base: tk._base, last: last, chg24: chg24, vol24: vol24, ratio: ratio,
       distHi: distHi, distLo: distLo, ret7: ret7, rsi: rsi, aboveMa: last > ma20, funding: null, plan: null,
+      surgeUp: surgeUp, surgeDn: surgeDn, surgeScore: surgeScore,
       high20: high20, low20: low20, ma200: ma200, distMa200: ma200 ? last / ma200 - 1 : null, bb: bb, bbExp: bbExp,
       long: { sVol: sVol, sBrk: lBrk, sMom: lMom, sBB: lBB, penalty: lp, score: Math.max(0, sVol + lBrk + lMom + lBB - lp), tags: lt, warns: lw,
               eligible: ratio >= MIN_VOLUME_RATIO && distHi >= -NEAR_EDGE && last > ma20 && trendUp },
@@ -716,7 +731,7 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
   }
 
   /* ---------------------------------------------------------------- 상태/스캔 */
-  var state = { longs: [], shorts: [], nLong: 0, nShort: 0, scanned: 0, breadth: 0, builtAt: 0, scanning: false, market: S.market };
+  var state = { longs: [], shorts: [], surges: [], nLong: 0, nShort: 0, scanned: 0, breadth: 0, builtAt: 0, scanning: false, market: S.market };
   var dailyCache = {};
   var live = { px: {}, open: {} };
   var byInst = {};
@@ -779,6 +794,11 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
         n += 1;
         setProgress(0.75 + 0.25 * n / Math.max(1, picks.length), '15분봉 플랜 ' + n + '/' + picks.length);
       });
+
+      var pickedInsts = {};
+      longs.concat(shorts).forEach(function (m) { pickedInsts[m.inst] = true; });
+      state.surges = results.filter(function (r) { return (r.surgeUp || r.surgeDn) && !pickedInsts[r.inst]; })
+        .sort(function (a, b) { return b.surgeScore - a.surgeScore; }).slice(0, SURGE_TOP_N);
 
       state.longs = longs; state.shorts = shorts; state.nLong = longOk.length; state.nShort = shortOk.length;
       state.scanned = results.length; state.builtAt = Date.now();
@@ -859,6 +879,31 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
     if (s.penalty) parts.push('단, 이미 많이 움직여 ' + Math.round(s.penalty) + '점 감점됐으니 추격에 주의하세요.');
     return parts.join(' ');
   }
+  function surgeReason(m) {
+    var up = m.surgeUp, bits = ['거래대금이 20일 평균보다 ' + m.ratio.toFixed(1) + '배 폭증'];
+    if (up) {
+      if (m.chg24 >= SURGE_CHG24) bits.push('24시간 ' + fmtPct(m.chg24) + ' 급등');
+      if (m.ret7 >= SURGE_RET7) bits.push('최근 7일 ' + fmtPct(m.ret7) + ' 상승');
+    } else {
+      if (m.chg24 <= -SURGE_CHG24) bits.push('24시간 ' + fmtPct(m.chg24) + ' 급락');
+      if (m.ret7 <= -SURGE_RET7) bits.push('최근 7일 ' + fmtPct(-m.ret7, false) + ' 하락');
+    }
+    return bits.join(', ') + '. 평소와 다른 이례적인 움직임이라 뉴스나 이벤트가 있었을 가능성이 있어요 — 직접 뉴스를 확인해보고, 이미 많이 움직인 뒤라 추격 매매는 신중하게 판단하세요.';
+  }
+  function surgeCardHTML(rank, m) {
+    var trade = S.market === 'swap' ? 'trade-swap' : 'trade-spot';
+    var suffix = m.inst.slice(m.base.length);
+    var dirTag = '<span class="tag t-surge-' + (m.surgeUp ? 'up' : 'down') + '">' + (m.surgeUp ? '급등' : '급락') + '</span>';
+    return '<article class="card surge">' +
+      '<div class="c-head"><span class="rank">' + rank + '</span><span class="name"><b>' + esc(m.base) + '</b><small>' + esc(suffix) + '</small></span></div>' +
+      '<div class="c-price"><span class="p-last">' + fmtPrice(m.last) + '</span><span class="p-chg ' + cls(m.chg24) + '">' + fmtPct(m.chg24) + '</span>' + sparkline(m.spark, '최근 30일 종가 추이') + '</div>' +
+      '<div class="tags">' + dirTag + '</div>' +
+      '<div class="c-meta"><span>거래대금 <b>' + m.ratio.toFixed(1) + 'x</b> (' + fmtMoney(m.vol24) + ')</span>' +
+      '<span>7일 <b class="' + cls(m.ret7) + '">' + fmtPct(m.ret7) + '</b></span></div>' +
+      '<div class="why">🚨 ' + esc(surgeReason(m)) + '</div>' +
+      '<div class="c-links"><a href="https://www.okx.com/' + trade + '/' + esc(m.inst.toLowerCase()) + '" target="_blank" rel="noopener">OKX 거래 &#8599;</a></div>' +
+      '</article>';
+  }
   function cardHTML(rank, m, side) {
     var s = m[side], p = m.plan, edge = side === 'long' ? m.high20 : m.low20, dist = side === 'long' ? m.distHi : m.distLo;
     var tags = s.tags.map(function (t) { return '<span class="tag t-' + (/^(돌파|이탈)/.test(t) ? 'brk' : 'vol') + '">' + esc(t) + '</span>'; }).join('') +
@@ -925,6 +970,9 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
     $('mk').textContent = S.market === 'swap' ? 'OKX 무기한 선물' : 'OKX 현물';
     $('cards-long').innerHTML = state.longs.length ? state.longs.map(function (m, i) { return cardHTML(i + 1, m, 'long'); }).join('') : '<div class="empty">오늘은 롱 조건을 통과한 종목이 없어요.</div>';
     $('cards-short').innerHTML = state.shorts.length ? state.shorts.map(function (m, i) { return cardHTML(i + 1, m, 'short'); }).join('') : '<div class="empty">오늘은 숏 조건을 통과한 종목이 없어요.</div>';
+    $('cnt-surge').textContent = state.surges.length;
+    $('sec-surge').hidden = !state.surges.length;
+    $('cards-surge').innerHTML = state.surges.map(function (m, i) { return surgeCardHTML(i + 1, m); }).join('');
     indexCards();
     [].slice.call(document.querySelectorAll('.card[data-inst]')).forEach(function (c) {
       var px = live.px[c.dataset.inst];
