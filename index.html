@@ -129,6 +129,8 @@ section { display: flex; flex-direction: column; gap: 10px; padding-top: 12px; }
 .c-meta { display: flex; flex-wrap: wrap; gap: 2px 14px; color: var(--muted); font-size: 12px; }
 .c-meta b { font-weight: 600; }
 .c-links a { color: var(--muted); font-size: 12px; }
+.why { background: var(--sel); color: var(--tag-ink); font-size: 12.5px; line-height: 1.55; padding: 8px 10px; border-radius: 8px; }
+footer .credit { margin-top: 8px; color: var(--muted); font-size: 11px; }
 .empty { padding: 26px 16px; color: var(--muted); background: var(--surface); border: 1px dashed var(--line); border-radius: 10px; }
 .skeleton { height: 210px; border-radius: 10px; background: linear-gradient(90deg, var(--surface), var(--tag-bg), var(--surface)); background-size: 200% 100%; animation: sk 1.4s linear infinite; }
 @keyframes sk { to { background-position: -200% 0; } }
@@ -208,6 +210,7 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
     선물은 레버리지 때문에 작은 반대 움직임에도 청산될 수 있어요. 특히 숏은 급등 한 번에 손실이 커지니, 진입 전에 차트와 호가를 직접 확인하고 손절 기준과 레버리지를 먼저 정해 두세요.
     롱은 200일 이동평균선 위, 숏은 아래인 종목만 나오고 큰 추세를 거스르는 진입은 만들지 않아요. 점수는 거래량 30 · 돌파 30 · 모멘텀 25 · 볼린저밴드 15점이에요.
     점수·순위·진입가는 스캔한 시점 기준이고, 가격과 진입 상태만 실시간으로 바뀌어요. 진입 구간·종가 손절 알림과 폰 메시지는 앱을 열어 둔 동안에만 보내져요. 손절 주문(강제 손절)은 꼭 거래소에 미리 걸어 두세요.
+    <div class="credit">Made by Hyo Seop. VER1.0</div>
   </footer>
 </div>
 
@@ -305,7 +308,7 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
     var d = Math.max(2, 3 - Math.floor(Math.log10(p)));
     return p.toFixed(d);
   }
-  function fmtPct(x) { return (x >= 0 ? '+' : '') + (x * 100).toFixed(1) + '%'; }
+  function fmtPct(x, signed) { if (signed === false) return (x * 100).toFixed(1) + '%'; return (x >= 0 ? '+' : '') + (x * 100).toFixed(1) + '%'; }
   function fmtMoney(v) {
     if (v >= 1e9) return (v / 1e9).toFixed(2) + 'B';
     if (v >= 1e6) return (v / 1e6).toFixed(1) + 'M';
@@ -494,6 +497,46 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
       return above ? (z.level < best.level ? z : best) : (z.level > best.level ? z : best);
     }, null);
   }
+  function zigzag(highs, lows, pct) {
+    var n = highs.length;
+    if (n < 2) return [];
+    var hiIdx = 0, hiVal = highs[0], loIdx = 0, loVal = lows[0], trend = 0, piv = [];
+    for (var i = 1; i < n; i++) {
+      if (highs[i] > hiVal) { hiVal = highs[i]; hiIdx = i; }
+      if (lows[i] < loVal) { loVal = lows[i]; loIdx = i; }
+      if (trend !== 1 && highs[i] >= loVal * (1 + pct)) {
+        piv.push([loIdx, loVal, 'L']); trend = 1; hiVal = highs[i]; hiIdx = i;
+      } else if (trend !== -1 && lows[i] <= hiVal * (1 - pct)) {
+        piv.push([hiIdx, hiVal, 'H']); trend = -1; loVal = lows[i]; loIdx = i;
+      }
+    }
+    if (trend === 1) piv.push([hiIdx, hiVal, 'H']);
+    else if (trend === -1) piv.push([loIdx, loVal, 'L']);
+    return piv;
+  }
+  function fibLevel(a, b, ratio) { return b - ratio * (b - a); }
+  function validImpulse(six, isLong) {
+    var types = six.map(function (p) { return p[2]; });
+    var want = isLong ? ['L', 'H', 'L', 'H', 'L', 'H'] : ['H', 'L', 'H', 'L', 'H', 'L'];
+    for (var i = 0; i < 6; i++) if (types[i] !== want[i]) return null;
+    var p0 = six[0][1], p1 = six[1][1], p2 = six[2][1], p3 = six[3][1], p4 = six[4][1], p5 = six[5][1];
+    var w1 = Math.abs(p1 - p0), w3 = Math.abs(p3 - p2), w5 = Math.abs(p5 - p4);
+    if (isLong) { if (p2 <= p0 || p4 <= p1 || p3 <= p1) return null; }
+    else { if (p2 >= p0 || p4 >= p1 || p3 >= p1) return null; }
+    if (w3 < w1 && w3 < w5) return null;
+    return six;
+  }
+  function elliottSetup(piv, isLong) {
+    var p0, pEnd, stage;
+    if (piv.length >= 6 && validImpulse(piv.slice(-6), isLong)) {
+      p0 = piv[piv.length - 6][1]; pEnd = piv[piv.length - 1][1]; stage = 'postimpulse';
+    } else if (piv.length >= 2 && piv[piv.length - 2][2] === (isLong ? 'L' : 'H') && piv[piv.length - 1][2] === (isLong ? 'H' : 'L')) {
+      p0 = piv[piv.length - 2][1]; pEnd = piv[piv.length - 1][1]; stage = 'wave2';
+    } else return null;
+    var entry = fibLevel(p0, pEnd, 0.618);
+    var pair = [fibLevel(p0, pEnd, 0.5), fibLevel(p0, pEnd, 0.786)].sort(function (a, b) { return a - b; });
+    return { entry: entry, zone: pair, invalid: p0, pStart: p0, pEnd: pEnd, stage: stage };
+  }
   function entryPlan(side, price, rows, rows4h, dailyRows, ma200) {
     rows = sortRows(rows);
     var conf = rows.filter(function (r) { return r[8] === '1'; });
@@ -506,11 +549,27 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
     var e20 = e20s[e20s.length - 1], e50 = e50s[e50s.length - 1];
     var atr = atrWilder(highs, lows, closes, 14);
     if (!atr || atr <= 0) return null;
+    var isLong = side === 'long';
     var conf4 = sortRows((rows4h || []).filter(function (r) { return r[8] === '1'; }));
     var confd = sortRows((dailyRows || []).filter(function (r) { return r[8] === '1'; }));
     var atr4 = conf4.length >= 15 ? atrWilder(conf4.map(function (r) { return parseFloat(r[2]); }),
       conf4.map(function (r) { return parseFloat(r[3]); }), conf4.map(function (r) { return parseFloat(r[4]); }), 14) : null;
     var zones = keyLevels(confd, conf4);
+    var elliott = null, elliottSrc = null;
+    var tfSources = [
+      ['4h', conf4.map(function (r) { return parseFloat(r[2]); }), conf4.map(function (r) { return parseFloat(r[3]); }), 0.03],
+      ['1d', confd.map(function (r) { return parseFloat(r[2]); }), confd.map(function (r) { return parseFloat(r[3]); }), 0.08]
+    ];
+    for (var ti = 0; ti < tfSources.length; ti++) {
+      var srcName = tfSources[ti][0], hh = tfSources[ti][1], ll = tfSources[ti][2], pct = tfSources[ti][3];
+      if (hh.length < 20) continue;
+      var setup = elliottSetup(zigzag(hh, ll, pct), isLong);
+      if (!setup) continue;
+      if (isLong && (price <= setup.invalid || price > setup.pEnd * 1.35)) continue;
+      if (!isLong && (price >= setup.invalid || price < setup.pEnd * 0.65)) continue;
+      if (Math.abs(setup.entry / price - 1) > 0.15) continue;
+      elliott = setup; elliottSrc = srcName; break;
+    }
     var rsi15 = rsi14(closes.concat([price]));
     var bb = bollinger(closes.slice(-19).concat([price]));
     var widths = [];
@@ -519,7 +578,7 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
     var squeeze = widths.length > 0 && bb.width <= widths[Math.floor(0.2 * widths.length)];
     var plan = { side: side, valid: false, ema20: e20, ema50: e50, atr: atr, atrPct: atr / price, rsi15: rsi15,
                  spark: closes.slice(-96).concat([price]), warns: [], bb: bb, squeeze: squeeze, ma200: ma200 == null ? null : ma200 };
-    var isLong = side === 'long', trendOk;
+    var trendOk;
     if (isLong) trendOk = price > e20 && e20 > e50 && e20 > e20s[e20s.length - 4];
     else trendOk = price < e20 && e20 < e50 && e20 < e20s[e20s.length - 4];
     if (!trendOk) return plan;
@@ -528,25 +587,48 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
     if (isLong) hiN = turn ? turn.level : maxOf(highs.slice(-SWING_BARS));
     else loN = turn ? turn.level : minOf(lows.slice(-SWING_BARS));
     var nearThresh = atr4 ? Math.max(3 * atr, 0.8 * atr4) : 3 * atr;
-    plan.level = isLong ? hiN : loN; plan.levelSrc = turn ? 'sr' : 'swing15';
-    plan.levelTouch = turn ? turn.n : 1; plan.levelDaily = !!(turn && turn.daily);
+    if (elliott) {
+      plan.level = elliott.pEnd; plan.levelSrc = 'elliott'; plan.elliottZone = elliott.zone;
+      plan.elliottInvalid = elliott.invalid; plan.elliottTf = elliottSrc; plan.elliottStage = elliott.stage;
+    } else {
+      plan.level = isLong ? hiN : loN; plan.levelSrc = turn ? 'sr' : 'swing15';
+      plan.levelTouch = turn ? turn.n : 1; plan.levelDaily = !!(turn && turn.daily);
+    }
     var kind, entry, stop, risk, targets, extreme, overRsi, overBB;
     if (isLong) {
       overRsi = rsi15 != null && rsi15 >= 78; overBB = bb.pctB >= 1; extreme = overRsi || overBB;
-      if (price < hiN && !extreme && hiN - price <= nearThresh) { kind = 'stop'; entry = hiN + 0.1 * atr; }
-      else { kind = 'limit'; entry = price >= hiN ? Math.max(hiN, e20) : e20; }
-      var swing = anchor ? (anchor.level - 0.1 * atr) : (minOf(lows.slice(-STOP_BARS)) - 0.1 * atr);
+      var swing;
+      if (elliott) { kind = 'fib'; entry = elliott.entry; swing = elliott.invalid - 0.1 * atr; }
+      else if (price < hiN && !extreme && hiN - price <= nearThresh) {
+        kind = 'stop'; entry = hiN + 0.1 * atr;
+        swing = anchor ? (anchor.level - 0.1 * atr) : (minOf(lows.slice(-STOP_BARS)) - 0.1 * atr);
+      } else {
+        kind = 'limit'; entry = price >= hiN ? Math.max(hiN, e20) : e20;
+        swing = anchor ? (anchor.level - 0.1 * atr) : (minOf(lows.slice(-STOP_BARS)) - 0.1 * atr);
+      }
       stop = Math.max(entry - 2 * atr, Math.min(swing, entry - 0.8 * atr));
       risk = entry - stop;
-      targets = TP_R.map(function (k) { return entry + k * risk; });
+      if (elliott) {
+        var waveLen = Math.abs(elliott.pEnd - elliott.pStart);
+        targets = [elliott.pEnd + 0.618 * waveLen, elliott.pEnd + 1.272 * waveLen];
+      } else targets = TP_R.map(function (k) { return entry + k * risk; });
     } else {
       overRsi = rsi15 != null && rsi15 <= 22; overBB = bb.pctB <= 0; extreme = overRsi || overBB;
-      if (price > loN && !extreme && price - loN <= nearThresh) { kind = 'stop'; entry = loN - 0.1 * atr; }
-      else { kind = 'limit'; entry = price <= loN ? Math.min(loN, e20) : e20; }
-      var swing2 = anchor ? (anchor.level + 0.1 * atr) : (maxOf(highs.slice(-STOP_BARS)) + 0.1 * atr);
+      var swing2;
+      if (elliott) { kind = 'fib'; entry = elliott.entry; swing2 = elliott.invalid + 0.1 * atr; }
+      else if (price > loN && !extreme && price - loN <= nearThresh) {
+        kind = 'stop'; entry = loN - 0.1 * atr;
+        swing2 = anchor ? (anchor.level + 0.1 * atr) : (maxOf(highs.slice(-STOP_BARS)) + 0.1 * atr);
+      } else {
+        kind = 'limit'; entry = price <= loN ? Math.min(loN, e20) : e20;
+        swing2 = anchor ? (anchor.level + 0.1 * atr) : (maxOf(highs.slice(-STOP_BARS)) + 0.1 * atr);
+      }
       stop = Math.min(entry + 2 * atr, Math.max(swing2, entry + 0.8 * atr));
       risk = stop - entry;
-      targets = TP_R.map(function (k) { return Math.max(entry - k * risk, 0); });
+      if (elliott) {
+        var waveLen2 = Math.abs(elliott.pEnd - elliott.pStart);
+        targets = [Math.max(elliott.pEnd - 0.618 * waveLen2, 0), Math.max(elliott.pEnd - 1.272 * waveLen2, 0)];
+      } else targets = TP_R.map(function (k) { return Math.max(entry - k * risk, 0); });
     }
     if (ma200 != null && ((isLong && entry <= ma200) || (!isLong && entry >= ma200))) { plan.reason = 'ma200'; plan.entry = entry; return plan; }
     /* 손절 헌팅 방어: 꼬리 길이 90분위수만큼 바깥에 강제 손절(주문용)을 둔다. 손절선은 15분 종가 기준으로만 쓴다 */
@@ -734,8 +816,48 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
     return '<span class="tag ' + (adverse ? 't-warn' : 't-fund') + '">펀딩 ' + (m.funding >= 0 ? '+' : '') + (m.funding * 100).toFixed(3) + '%</span>';
   }
   function kindLabel(kind, side) {
+    if (kind === 'fib') return side === 'long' ? '피보나치 되돌림 매수' : '피보나치 되돌림 매도';
     if (side === 'long') return kind === 'stop' ? '돌파 시 진입(스톱)' : '눌림 지정가';
     return kind === 'stop' ? '이탈 시 진입(스톱)' : '반등 지정가';
+  }
+  function recoReason(m, side) {
+    var isLong = side === 'long', s = m[side], p = m.plan, bits = [];
+    bits.push(m.ratio >= 3 ? ('거래대금이 20일 평균보다 ' + m.ratio.toFixed(1) + '배 급증')
+                            : ('거래대금이 20일 평균보다 ' + m.ratio.toFixed(1) + '배 늘어남'));
+    var dist = isLong ? m.distHi : m.distLo, edgeWord = isLong ? '20일 고점' : '20일 저점';
+    if (isLong) bits.push(dist >= 0 ? (edgeWord + '을 ' + fmtPct(dist) + ' 돌파') : (edgeWord + ' ' + fmtPct(-dist, false) + ' 앞까지 돌파 임박'));
+    else bits.push(dist <= 0 ? (edgeWord + '을 ' + fmtPct(-dist, false) + ' 이탈') : (edgeWord + ' ' + fmtPct(dist, false) + ' 앞까지 이탈 임박'));
+    bits.push('20일선·200일선 모두 ' + (isLong ? '상승' : '하락') + ' 흐름 위');
+    if (isLong && m.ret7 >= 0.05) bits.push('최근 7일 ' + fmtPct(m.ret7) + ' 상승');
+    else if (!isLong && m.ret7 <= -0.05) bits.push('최근 7일 ' + fmtPct(-m.ret7, false) + ' 하락');
+    var bb = m.bb;
+    if (isLong) {
+      if (bb.pctB >= 1.0) bits.push('볼린저 상단을 이미 돌파(%B ' + bb.pctB.toFixed(2) + ')');
+      else if (bb.pctB >= 0.8) bits.push('볼린저 상단에 근접(%B ' + bb.pctB.toFixed(2) + ')');
+    } else {
+      if (bb.pctB <= 0.0) bits.push('볼린저 하단을 이미 이탈(%B ' + bb.pctB.toFixed(2) + ')');
+      else if (bb.pctB <= 0.2) bits.push('볼린저 하단에 근접(%B ' + bb.pctB.toFixed(2) + ')');
+    }
+    if (m.bbExp >= 1.2) bits.push('밴드폭이 넓어지는 중이라 변동성 확대 국면');
+    var parts = [bits.join(', ') + '.'];
+    if (p && p.valid) {
+      if (p.levelSrc === 'elliott') {
+        var tf = p.elliottTf === '4h' ? '4시간봉' : '일봉';
+        parts.push(p.elliottStage === 'postimpulse'
+          ? (tf + ' 기준 엘리엇 5파가 끝난 뒤 되돌림 61.8%(피보나치) 자리 — 상위 추세 재개를 노려요.')
+          : (tf + ' 기준 1파 이후 2파 되돌림 61.8%(피보나치) 자리 — 이어지는 3파 시작을 노려요.'));
+      } else if (p.levelSrc === 'sr') {
+        var word = isLong ? '저항선' : '지지선';
+        parts.push('뚜렷한 파동은 없지만 ' + word + ' ' + fmtPrice(p.level) + '(' + (p.levelDaily ? '일봉' : '4시간봉') + '에서 ' + p.levelTouch + '회 접촉)에서 ' + (isLong ? '돌파' : '이탈') + '를 노려요.');
+      } else {
+        parts.push('뚜렷한 파동·지지/저항 구조가 없어 15분봉 최근 스윙 기준으로 진입가를 잡았어요.');
+      }
+      if (p.squeeze) parts.push('15분봉 볼린저밴드가 좁아진 스퀴즈 상태라 변동성 확대가 임박했을 수 있어요.');
+    } else if (p && !p.valid && p.reason !== 'ma200') {
+      parts.push('다만 아직 15분봉 추세(EMA20/EMA50) 조건을 못 채워 진입가는 대기 중이에요.');
+    }
+    if (s.penalty) parts.push('단, 이미 많이 움직여 ' + Math.round(s.penalty) + '점 감점됐으니 추격에 주의하세요.');
+    return parts.join(' ');
   }
   function cardHTML(rank, m, side) {
     var s = m[side], p = m.plan, edge = side === 'long' ? m.high20 : m.low20, dist = side === 'long' ? m.distHi : m.distLo;
@@ -751,11 +873,13 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
       attrs += ' data-sizemult="' + p.sizeMult.toFixed(2) + '" data-kind="' + p.kind + '" data-entry="' + e + '" data-stop="' + st + '" data-hard="' + p.hard + '" data-tp1="' + t1 + '" data-tp2="' + t2 + '" data-atr="' + p.atr + '"';
       pill = '<span class="pstat" data-st="wait">계산 중</span>';
       var lvlNote;
-      if (p.levelSrc === 'sr') {
+      if (p.levelSrc === 'elliott') {
+        lvlNote = '엘리엇 파동 · ' + (p.elliottTf === '4h' ? '4시간봉' : '일봉') + ' 기준 되돌림 61.8% (무효화 ' + fmtPrice(p.elliottInvalid) + ')';
+      } else if (p.levelSrc === 'sr') {
         var lvlWord = side === 'long' ? '저항' : '지지';
         lvlNote = lvlWord + ' ' + fmtPrice(p.level) + ' (' + (p.levelDaily ? '일봉 · ' : '4시간봉 · ') + p.levelTouch + '회 접촉)';
       } else {
-        lvlNote = '뚜렷한 4h/일봉 구간 없음 · 15분봉 최근 스윙 사용';
+        lvlNote = '뚜렷한 파동/구간 없음 · 15분봉 최근 스윙 사용';
       }
       planHTML = '<div class="pnote lvl">' + esc(lvlNote) + '</div>' +
         '<div class="plan"><span class="k">진입</span><b>' + fmtPrice(e) + '</b><em class="p-edist" title="현재가 대비">' + fmtPct(e / m.last - 1) + '</em>' +
@@ -788,6 +912,7 @@ dialog::backdrop { background: rgba(8, 12, 16, .62); }
       '<span>20일 ' + (side === 'long' ? '고점' : '저점') + ' <b class="p-dist ' + cls(dist) + '">' + fmtPct(dist) + '</b></span>' +
       '<span>200일선 <b class="p-ma200 ' + cls(m.distMa200) + '">' + fmtPct(m.distMa200) + '</b></span>' +
       '<span>7일 <b class="' + cls(m.ret7) + '">' + fmtPct(m.ret7) + '</b></span><span>RSI(일) <b>' + (m.rsi == null ? '-' : Math.round(m.rsi)) + '</b></span></div>' +
+      '<div class="why">💡 ' + esc(recoReason(m, side)) + '</div>' +
       '<div class="c-links"><a href="https://www.okx.com/' + trade + '/' + esc(m.inst.toLowerCase()) + '" target="_blank" rel="noopener">OKX 거래 &#8599;</a></div>' +
       '</article>';
   }
